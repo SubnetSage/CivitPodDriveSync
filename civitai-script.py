@@ -16,12 +16,18 @@ def add_api_token(url, api_key):
 
 # Example usage
 if __name__ == "__main__":
-    api_key = input("Enter your API key: ")
-    urls = [
-        "/api/download/models/12345?token=YOUR_TOKEN_HERE",
-        "https://civitai.com/api/download/models/128713?type=Model&format=SafeTensor&size=pruned&fp=fp16"
-    ]
-    
-    # Process each URL
-    for url in urls:
-        print(add_api_token(url, api_key))
+    api_key = input("Enter your API key: ").strip()
+    while True:
+        # Allow user to paste a link or exit
+        url = input("\nPaste the URL (or type 'exit' to quit): ").strip()
+        if url.lower() == "exit":
+            print("Goodbye!")
+            break
+        
+        try:
+            # Process and print the updated link
+            updated_url = add_api_token(url, api_key)
+            print("\nUpdated URL:")
+            print(updated_url)
+        except Exception as e:
+            print(f"Error processing the URL: {e}")
