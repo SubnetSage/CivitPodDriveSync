@@ -1,4 +1,5 @@
 import os
+import shutil
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 def add_api_token(url, api_key):
@@ -15,18 +16,29 @@ def add_api_token(url, api_key):
     updated_url = parsed_url._replace(query=new_query)
     return urlunparse(updated_url)
 
-def download_model(url, api_key):
+def download_and_move_model(url, api_key):
     try:
         # Process the URL to include the API token
         updated_url = add_api_token(url, api_key)
         
-        # Generate the wget command
-        command = f"wget \"{updated_url}\""
-        print("\nGenerated wget command:")
+        # Download the file using wget
+        command = f"wget -O temp_model.safetensors \"{updated_url}\""
+        print("\nDownloading with the following command:")
         print(command)
-        
-        # Execute the wget command
         os.system(command)
+        
+        # Define the destination directory and file path
+        destination_dir = "/workspace/stable-diffusion-webui/models/Stable-diffusion"
+        destination_file = os.path.join(destination_dir, "model.safetensors")
+        
+        # Ensure the destination directory exists
+        if not os.path.exists(destination_dir):
+            os.makedirs(destination_dir)
+        
+        # Move and rename the file
+        shutil.move("temp_model.safetensors", destination_file)
+        print(f"\nModel successfully moved to: {destination_file}")
+    
     except Exception as e:
         print(f"Error: {e}")
 
@@ -40,5 +52,5 @@ if __name__ == "__main__":
             print("Goodbye!")
             break
         
-        # Attempt to download the model
-        download_model(url, api_key)
+        # Attempt to download and move the model
+        download_and_move_model(url, api_key)
