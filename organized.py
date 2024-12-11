@@ -5,6 +5,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from google.oauth2.service_account import Credentials
 import json
+from datetime import datetime
 
 # Function to authenticate with Google Drive using Service Account credentials
 def authenticate_drive_api(credentials_json_path):
@@ -114,6 +115,17 @@ def main():
             api_key = input("Enter your API key for downloading models: ")
             save_config(folder_id, api_key)
 
+        # Get the current date for the folder name (format: YYYY-MM-DD)
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        
+        # Define the source folder based on the current date
+        source_folder = f"/workspace/stable-diffusion-webui/outputs/txt2img-images/{current_date}"
+
+        # Check if the folder exists
+        if not os.path.exists(source_folder):
+            print(f"Error: Folder {source_folder} does not exist.")
+            return
+
         # Ask for action choice
         action = input("Choose an action: \n1. Download and Move a Model\n2. Copy Photos to Google Drive\nChoose 1 or 2: ")
 
@@ -122,7 +134,6 @@ def main():
             download_and_move_model(url, api_key)
 
         if action == "2":
-            source_folder = "/workspace/stable-diffusion-webui/outputs"
             print("Starting to copy photos to Google Drive...")
             while True:
                 copy_photos_to_drive(drive_service, source_folder, folder_id)
