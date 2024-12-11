@@ -95,7 +95,7 @@ def load_config():
 # Main function to handle user input and execute the actions
 def main():
     # Define the path to the credentials JSON in the /workspace/ folder
-    credentials_json_path = "/workspace/service_account_credentials.json"
+    credentials_json_path = "/workspace/credentials.json"
     
     if not os.path.exists(credentials_json_path):
         print(f"Service account credentials file not found at {credentials_json_path}. Exiting.")
