@@ -4,10 +4,11 @@ import time
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from google.oauth2.service_account import Credentials
+import json
 
-# Function to authenticate with Google Drive using service account credentials
-def authenticate_drive_api(credentials_json):
-    creds = Credentials.from_service_account_file(credentials_json, scopes=["https://www.googleapis.com/auth/drive"])
+# Function to authenticate with Google Drive using Service Account credentials
+def authenticate_drive_api(credentials_json_path):
+    creds = Credentials.from_service_account_file(credentials_json_path, scopes=["https://www.googleapis.com/auth/drive.file"])
     service = build('drive', 'v3', credentials=creds)
     return service
 
@@ -22,7 +23,7 @@ def upload_to_drive(service, file_path, folder_id):
     uploaded_file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
     print(f"Uploaded {file_name} with File ID: {uploaded_file.get('id')}")
 
-# Function to copy photos to Google Drive every 5 minutes
+# Function to copy photos to Google Drive every 2 minutes
 def copy_photos_to_drive(service, source_folder, folder_id):
     if not os.path.exists("copied_files.txt"):
         open("copied_files.txt", "w").close()
@@ -74,39 +75,61 @@ def download_and_move_model(url, api_key):
     except Exception as e:
         print(f"Error: {e}")
 
+# Function to save folder_id and api_key to a file
+def save_config(folder_id, api_key):
+    config = {
+        "folder_id": folder_id,
+        "api_key": api_key
+    }
+    with open("config.json", "w") as config_file:
+        json.dump(config, config_file)
+
+# Function to load folder_id and api_key from a file
+def load_config():
+    if os.path.exists("config.json"):
+        with open("config.json", "r") as config_file:
+            config = json.load(config_file)
+            return config.get("folder_id"), config.get("api_key")
+    return None, None
+
 # Main function to handle user input and execute the actions
 def main():
-    # Check if the credentials file exists in the same folder
-    credentials_json_path = "credentials.json"
+    # Define the path to the credentials JSON in the /workspace/ folder
+    credentials_json_path = "/workspace/service_account_credentials.json"
     
     if not os.path.exists(credentials_json_path):
-        print("Service account credentials file (credentials.json) not found. Exiting.")
+        print(f"Service account credentials file not found at {credentials_json_path}. Exiting.")
         return
     
     try:
+        # Authenticate using service account credentials
         drive_service = authenticate_drive_api(credentials_json_path)
         print("Google Drive authenticated successfully!")
 
-        folder_id = input("Enter your Google Drive Folder ID: ")
+        # Load saved config or ask for new config if not present
+        folder_id, api_key = load_config()
 
-        # API Key for downloading models
-        api_key = input("Enter your API key for downloading models: ")
+        if not folder_id or not api_key:
+            folder_id = input("Enter your Google Drive Folder ID: ")
+            api_key = input("Enter your API key for downloading models: ")
+            save_config(folder_id, api_key)
 
+        # Ask for action choice
         action = input("Choose an action: \n1. Download and Move a Model\n2. Copy Photos to Google Drive\nChoose 1 or 2: ")
 
         if action == "1":
             url = input("Enter the URL to download the model: ")
             download_and_move_model(url, api_key)
 
-        elif action == "2":
+        if action == "2":
             source_folder = "/workspace/stable-diffusion-webui/outputs"
             print("Starting to copy photos to Google Drive...")
-            copy_photos_to_drive(drive_service, source_folder, folder_id)
-        
-        else:
-            print("Invalid option selected.")
+            while True:
+                copy_photos_to_drive(drive_service, source_folder, folder_id)
+                time.sleep(120)  # Wait for 2 minutes before uploading again
+
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
     main()
