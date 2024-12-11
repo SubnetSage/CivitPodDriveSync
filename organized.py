@@ -76,10 +76,11 @@ def download_and_move_model(url, api_key):
 
 # Main function to handle user input and execute the actions
 def main():
-    credentials_json_path = input("Enter the path to your service account credentials JSON: ")
+    # Check if the credentials file exists in the same folder
+    credentials_json_path = "credentials.json"
     
     if not os.path.exists(credentials_json_path):
-        print("Invalid file path. Exiting.")
+        print("Service account credentials file (credentials.json) not found. Exiting.")
         return
     
     try:
