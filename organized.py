@@ -1,14 +1,13 @@
 import os
-import time
 import shutil
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+import time
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from google.oauth2.service_account import Credentials
 
-# Function to authenticate with Google Drive
+# Function to authenticate with Google Drive using service account credentials
 def authenticate_drive_api(credentials_json):
-    creds = Credentials.from_service_account_info(credentials_json, scopes=["https://www.googleapis.com/auth/drive"])
+    creds = Credentials.from_service_account_file(credentials_json, scopes=["https://www.googleapis.com/auth/drive"])
     service = build('drive', 'v3', credentials=creds)
     return service
 
@@ -47,6 +46,7 @@ def copy_photos_to_drive(service, source_folder, folder_id):
 
 # Function to add an API token to a URL
 def add_api_token(url, api_key):
+    from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
     parsed_url = urlparse(url)
     query_params = parse_qs(parsed_url.query)
     query_params['token'] = api_key  # Add or update the token parameter
@@ -74,35 +74,38 @@ def download_and_move_model(url, api_key):
     except Exception as e:
         print(f"Error: {e}")
 
-# Main logic for terminal interaction
+# Main function to handle user input and execute the actions
 def main():
-    credentials_json_text = input("Paste your Google Drive credentials JSON here: ")
+    credentials_json_path = input("Enter the path to your service account credentials JSON: ")
+    
+    if not os.path.exists(credentials_json_path):
+        print("Invalid file path. Exiting.")
+        return
+    
     try:
-        credentials_json = eval(credentials_json_text)
-        drive_service = authenticate_drive_api(credentials_json)
+        drive_service = authenticate_drive_api(credentials_json_path)
         print("Google Drive authenticated successfully!")
 
         folder_id = input("Enter your Google Drive Folder ID: ")
 
+        # API Key for downloading models
         api_key = input("Enter your API key for downloading models: ")
 
-        action = input("Choose an action [1] Download and Move a Model [2] Copy Photos to Google Drive: ")
+        action = input("Choose an action: \n1. Download and Move a Model\n2. Copy Photos to Google Drive\nChoose 1 or 2: ")
 
         if action == "1":
-            url = input("Paste the URL to download the model: ")
-            if url and api_key:
-                download_and_move_model(url, api_key)
-            else:
-                print("Please provide a URL and API key.")
+            url = input("Enter the URL to download the model: ")
+            download_and_move_model(url, api_key)
 
         elif action == "2":
             source_folder = "/workspace/stable-diffusion-webui/outputs"
+            print("Starting to copy photos to Google Drive...")
             copy_photos_to_drive(drive_service, source_folder, folder_id)
-
+        
         else:
-            print("Invalid action selected.")
+            print("Invalid option selected.")
     except Exception as e:
-        print(f"Invalid JSON format: {e}")
+        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
