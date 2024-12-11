@@ -8,18 +8,9 @@ import json
 
 # Function to authenticate with Google Drive using Service Account credentials
 def authenticate_drive_api(credentials_json_path):
-    try:
-        # Load credentials from the service account file
-        creds = Credentials.from_service_account_file(credentials_json_path, scopes=["https://www.googleapis.com/auth/drive.file"])
-        service = build('drive', 'v3', credentials=creds)
-        
-        # Make a test API call to check if authentication is successful
-        service.files().list().execute()  # Just list files to test
-        print("Google Drive authenticated successfully!")
-        return service
-    except Exception as e:
-        print(f"Authentication failed: {e}")
-        raise
+    creds = Credentials.from_service_account_file(credentials_json_path, scopes=["https://www.googleapis.com/auth/drive.file"])
+    service = build('drive', 'v3', credentials=creds)
+    return service
 
 # Function to upload a file to Google Drive
 def upload_to_drive(service, file_path, folder_id):
@@ -29,11 +20,8 @@ def upload_to_drive(service, file_path, folder_id):
         "name": file_name,
         "parents": [folder_id]
     }
-    try:
-        uploaded_file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
-        print(f"Uploaded {file_name} with File ID: {uploaded_file.get('id')}")
-    except Exception as e:
-        print(f"Failed to upload {file_name}: {e}")
+    uploaded_file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+    print(f"Uploaded {file_name} with File ID: {uploaded_file.get('id')}")
 
 # Function to copy photos to Google Drive every 2 minutes
 def copy_photos_to_drive(service, source_folder, folder_id):
@@ -116,6 +104,7 @@ def main():
     try:
         # Authenticate using service account credentials
         drive_service = authenticate_drive_api(credentials_json_path)
+        print("Google Drive authenticated successfully!")
 
         # Load saved config or ask for new config if not present
         folder_id, api_key = load_config()
