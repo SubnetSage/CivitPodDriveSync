@@ -1,7 +1,6 @@
 import os
 import time
 import shutil
-import streamlit as st
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -22,7 +21,7 @@ def upload_to_drive(service, file_path, folder_id):
         "parents": [folder_id]
     }
     uploaded_file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
-    st.success(f"Uploaded {file_name} with File ID: {uploaded_file.get('id')}")
+    print(f"Uploaded {file_name} with File ID: {uploaded_file.get('id')}")
 
 # Function to copy photos to Google Drive every 5 minutes
 def copy_photos_to_drive(service, source_folder, folder_id):
@@ -44,7 +43,7 @@ def copy_photos_to_drive(service, source_folder, folder_id):
             with open("copied_files.txt", "a") as file:
                 file.write(file_name + "\n")
         except Exception as e:
-            st.error(f"Failed to upload {file_name}: {e}")
+            print(f"Failed to upload {file_name}: {e}")
 
 # Function to add an API token to a URL
 def add_api_token(url, api_key):
@@ -60,7 +59,7 @@ def download_and_move_model(url, api_key):
     try:
         updated_url = add_api_token(url, api_key)
         command = f"wget -O temp_model.safetensors \"{updated_url}\""
-        st.info(f"Downloading with the following command:\n{command}")
+        print(f"Downloading with the following command:\n{command}")
         os.system(command)
 
         destination_dir = "/workspace/stable-diffusion-webui/models/Stable-diffusion"
@@ -70,52 +69,40 @@ def download_and_move_model(url, api_key):
             os.makedirs(destination_dir)
         
         shutil.move("temp_model.safetensors", destination_file)
-        st.success(f"Model successfully moved to: {destination_file}")
+        print(f"Model successfully moved to: {destination_file}")
     
     except Exception as e:
-        st.error(f"Error: {e}")
+        print(f"Error: {e}")
 
-# Streamlit app logic
+# Main logic for terminal interaction
 def main():
-    st.title("Stable Diffusion Automation Tool")
+    credentials_json_text = input("Paste your Google Drive credentials JSON here: ")
+    try:
+        credentials_json = eval(credentials_json_text)
+        drive_service = authenticate_drive_api(credentials_json)
+        print("Google Drive authenticated successfully!")
 
-    # Paste credentials.json
-    credentials_json_text = st.text_area("Paste your Google Drive credentials JSON here")
-    if credentials_json_text:
-        try:
-            credentials_json = eval(credentials_json_text)
-            drive_service = authenticate_drive_api(credentials_json)
-            st.success("Google Drive authenticated successfully!")
+        folder_id = input("Enter your Google Drive Folder ID: ")
 
-            # Get Google Drive Folder ID
-            folder_id = st.text_input("Enter your Google Drive Folder ID")
+        api_key = input("Enter your API key for downloading models: ")
 
-            # API Key for downloading models
-            api_key = st.text_input("Enter your API key for downloading models")
+        action = input("Choose an action [1] Download and Move a Model [2] Copy Photos to Google Drive: ")
 
-            # Select an action
-            action = st.selectbox("Choose an action", ["Select an action", "Download and Move a Model", "Copy Photos to Google Drive"])
-            
-            if action == "Download and Move a Model":
-                url = st.text_input("Paste the URL to download the model")
-                if st.button("Download and Move Model"):
-                    if url and api_key:
-                        download_and_move_model(url, api_key)
-                    else:
-                        st.error("Please provide a URL and API key.")
-            
-            elif action == "Copy Photos to Google Drive":
-                source_folder = "/workspace/stable-diffusion-webui/outputs"
-                if st.button("Start Copying Photos"):
-                    if folder_id:
-                        st.info("Copying photos to Google Drive...")
-                        copy_photos_to_drive(drive_service, source_folder, folder_id)
-                    else:
-                        st.error("Please provide a Google Drive Folder ID.")
-        except Exception as e:
-            st.error(f"Invalid JSON format: {e}")
-    else:
-        st.warning("Please paste your credentials JSON.")
+        if action == "1":
+            url = input("Paste the URL to download the model: ")
+            if url and api_key:
+                download_and_move_model(url, api_key)
+            else:
+                print("Please provide a URL and API key.")
+
+        elif action == "2":
+            source_folder = "/workspace/stable-diffusion-webui/outputs"
+            copy_photos_to_drive(drive_service, source_folder, folder_id)
+
+        else:
+            print("Invalid action selected.")
+    except Exception as e:
+        print(f"Invalid JSON format: {e}")
 
 if __name__ == "__main__":
     main()
