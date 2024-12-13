@@ -121,8 +121,9 @@ def main():
         folder_id, api_key = load_config()
 
         if not folder_id or not api_key:
-            folder_id = input("Enter your Google Drive Folder ID: ")
-            api_key = input("Enter your API key for downloading models: ")
+            print("Configuration not found. Please provide the following details.")
+            folder_id = input("Enter your Google Drive Folder ID: ").strip()
+            api_key = input("Enter your API key for downloading models: ").strip()
             save_config(folder_id, api_key)
 
         # Validate folder ID
@@ -131,13 +132,13 @@ def main():
             return
 
         # Ask for action choice
-        action = input("Choose an action: \n1. Download and Move a Model\n2. Copy Photos to Google Drive\nChoose 1 or 2: ")
+        action = input("Choose an action: \n1. Download and Move a Model\n2. Copy Photos to Google Drive\nChoose 1 or 2: ").strip()
 
         if action == "1":
-            url = input("Enter the URL to download the model: ")
+            url = input("Enter the URL to download the model: ").strip()
             download_and_move_model(url, api_key)
 
-        if action == "2":
+        elif action == "2":
             # Dynamically set the source folder to the current date
             current_date = datetime.now().strftime("%Y-%m-%d")
             source_folder = f"/workspace/stable-diffusion-webui/outputs/txt2img-images/{current_date}"
