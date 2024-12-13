@@ -1,10 +1,11 @@
 import os
 import shutil
 import time
+import json
+from datetime import datetime
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from google.oauth2.service_account import Credentials
-import json
 
 # Function to authenticate with Google Drive using Service Account credentials
 def authenticate_drive_api(credentials_json_path):
@@ -122,10 +123,16 @@ def main():
             download_and_move_model(url, api_key)
 
         if action == "2":
-            source_folder = "/workspace/stable-diffusion-webui/outputs"
-            print("Starting to copy photos to Google Drive...")
+            # Dynamically set the source folder to the current date
+            current_date = datetime.now().strftime("%Y-%m-%d")
+            source_folder = f"/workspace/stable-diffusion-webui/outputs/txt2img-images/{current_date}"
+            
+            print(f"Starting to copy photos to Google Drive from {source_folder}...")
             while True:
-                copy_photos_to_drive(drive_service, source_folder, folder_id)
+                if os.path.exists(source_folder):
+                    copy_photos_to_drive(drive_service, source_folder, folder_id)
+                else:
+                    print(f"Source folder {source_folder} does not exist. Retrying in 2 minutes...")
                 time.sleep(120)  # Wait for 2 minutes before uploading again
 
     except Exception as e:
