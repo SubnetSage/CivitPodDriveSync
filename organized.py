@@ -13,6 +13,16 @@ def authenticate_drive_api(credentials_json_path):
     service = build('drive', 'v3', credentials=creds)
     return service
 
+# Function to validate Google Drive folder access
+def validate_folder(service, folder_id):
+    try:
+        folder = service.files().get(fileId=folder_id, fields="id, name").execute()
+        print(f"Successfully accessed folder: {folder.get('name')} (ID: {folder.get('id')})")
+        return True
+    except Exception as e:
+        print(f"Failed to access folder with ID {folder_id}: {e}")
+        return False
+
 # Function to upload a file to Google Drive
 def upload_to_drive(service, file_path, folder_id):
     file_name = os.path.basename(file_path)
@@ -114,6 +124,11 @@ def main():
             folder_id = input("Enter your Google Drive Folder ID: ")
             api_key = input("Enter your API key for downloading models: ")
             save_config(folder_id, api_key)
+
+        # Validate folder ID
+        if not validate_folder(drive_service, folder_id):
+            print("Invalid Google Drive folder ID. Exiting.")
+            return
 
         # Ask for action choice
         action = input("Choose an action: \n1. Download and Move a Model\n2. Copy Photos to Google Drive\nChoose 1 or 2: ")
