@@ -9,7 +9,7 @@ from google.oauth2.service_account import Credentials
 
 # Function to authenticate with Google Drive using Service Account credentials
 def authenticate_drive_api(credentials_json_path):
-    creds = Credentials.from_service_account_file(credentials_json_path, scopes=["https://www.googleapis.com/auth/drive.file"])
+    creds = Credentials.from_service_account_file(credentials_json_path, scopes=["https://www.googleapis.com/auth/drive"])  # Updated scope for full access
     service = build('drive', 'v3', credentials=creds)
     return service
 
@@ -21,6 +21,8 @@ def validate_folder(service, folder_id):
         return True
     except Exception as e:
         print(f"Failed to access folder with ID {folder_id}: {e}")
+        if "forbidden" in str(e).lower():
+            print("Ensure that the service account has been granted access to this folder.")
         return False
 
 # Function to upload a file to Google Drive
@@ -128,7 +130,7 @@ def main():
 
         # Validate folder ID
         if not validate_folder(drive_service, folder_id):
-            print("Invalid Google Drive folder ID. Exiting.")
+            print("Invalid Google Drive folder ID or access issue. Exiting.")
             return
 
         # Ask for action choice
