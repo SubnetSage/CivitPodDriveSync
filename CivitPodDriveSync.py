@@ -2,6 +2,7 @@ import os
 import shutil
 import time
 import json
+import subprocess
 from datetime import datetime
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -105,56 +106,19 @@ def load_config():
             return config.get("folder_id"), config.get("api_key")
     return None, None
 
+# Function to clone a repository into a specified directory
+def clone_repository(repo_url, target_dir):
+    try:
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)  # Ensure the target directory exists
+        command = f"git clone {repo_url} {target_dir}"
+        print(f"Cloning repository with the following command:\n{command}")
+        os.system(command)
+        print(f"Repository successfully cloned into: {target_dir}")
+    except Exception as e:
+        print(f"Failed to clone repository: {e}")
+
 # Main function to handle user input and execute the actions
 def main():
     # Define the path to the credentials JSON in the /workspace/ folder
-    credentials_json_path = "/workspace/credentials.json"
-    
-    if not os.path.exists(credentials_json_path):
-        print(f"Service account credentials file not found at {credentials_json_path}. Exiting.")
-        return
-    
-    try:
-        # Authenticate using service account credentials
-        drive_service = authenticate_drive_api(credentials_json_path)
-        print("Google Drive authenticated successfully!")
-
-        # Load saved config or ask for new config if not present
-        folder_id, api_key = load_config()
-
-        if not folder_id or not api_key:
-            print("Configuration not found. Please provide the following details.")
-            folder_id = input("Enter your Google Drive Folder ID: ").strip()
-            api_key = input("Enter your API key for downloading models: ").strip()
-            save_config(folder_id, api_key)
-
-        # Validate folder ID
-        if not validate_folder(drive_service, folder_id):
-            print("Invalid Google Drive folder ID or access issue. Exiting.")
-            return
-
-        # Ask for action choice
-        action = input("Choose an action: \n1. Download and Move a Model\n2. Copy Photos to Google Drive\nChoose 1 or 2: ").strip()
-
-        if action == "1":
-            url = input("Enter the URL to download the model: ").strip()
-            download_and_move_model(url, api_key)
-
-        elif action == "2":
-            # Dynamically set the source folder to the current date
-            current_date = datetime.now().strftime("%Y-%m-%d")
-            source_folder = f"/workspace/stable-diffusion-webui/outputs/txt2img-images/{current_date}"
-            
-            print(f"Starting to copy photos to Google Drive from {source_folder}...")
-            while True:
-                if os.path.exists(source_folder):
-                    copy_photos_to_drive(drive_service, source_folder, folder_id)
-                else:
-                    print(f"Source folder {source_folder} does not exist. Retrying in 2 minutes...")
-                time.sleep(120)  # Wait for 2 minutes before uploading again
-
-    except Exception as e:
-        print(f"Error: {e}")
-
-if __name__ == "__main__":
-    main()
+    credentials_json_path = "/workspace/credentials.json
