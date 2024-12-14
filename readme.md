@@ -1,4 +1,4 @@
-## Google Drive Photo Uploader with Model Downloader
+## CivitPodDriveSync
 
 This guide explains how to use a Python script to upload photos from a specific folder to your Google Drive and download a model from a URL to your RunPod instance.
 
