@@ -1,4 +1,4 @@
-```markdown
+
 # Stable Diffusion Automation Script for RunPod
 
 This script automates the process of downloading Stable Diffusion models from CivitAI, organizing them in the appropriate directories, and managing the workflow of generating and uploading images from a Stable Diffusion instance hosted on RunPod.
@@ -116,6 +116,3 @@ The script saves configuration details in `config.json`:
 ## License
 
 This project is licensed under the MIT License.
-```
-
-Let me know if you'd like any changes or additional sections in this README!
