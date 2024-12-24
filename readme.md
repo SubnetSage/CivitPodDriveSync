@@ -1,6 +1,3 @@
-Absolutely, here's the updated readme file with step-by-step instructions for the code:
-
-```markdown
 # Stable Diffusion Automation Script for RunPod
 
 This script automates the process of downloading Stable Diffusion models from CivitAI, organizing them in the appropriate directories, and managing the workflow of generating and uploading images from a Stable Diffusion instance hosted on RunPod.
