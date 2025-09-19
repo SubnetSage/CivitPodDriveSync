@@ -1,124 +1,91 @@
-# Stable Diffusion Automation Script for RunPod
+Here’s a cleaner, more user-focused rewrite of your README. I emphasized the time-saving purpose, organized structure, and made it easier for someone new to follow:
 
-This script automates the process of downloading Stable Diffusion models from CivitAI, organizing them in the appropriate directories, and managing the workflow of generating and uploading images from a Stable Diffusion instance hosted on RunPod.
+⸻
 
----
+RunPod Stable Diffusion Automation
 
-## Features
+This tool helps you save time managing Stable Diffusion models and outputs on RunPod. Instead of wasting hours moving files around, the script handles model downloads, organizes them in the right directories, and automatically syncs generated images to Google Drive — so you can spend more time creating.
 
-1. **Model Management**:
-    - Downloads Stable Diffusion models from CivitAI using API tokens.
-    - Automatically moves the downloaded models to the correct directory on RunPod.
+⸻
 
-2. **Google Drive Integration**:
-    - Authenticates with Google Drive via a service account.
-    - Uploads generated images from RunPod's Stable Diffusion output directory to a specified Google Drive folder.
+✨ What It Does
+	1.	Model Management
+	•	Download Stable Diffusion models directly from CivitAI using your API key.
+	•	Automatically move them into the correct RunPod model directory.
+	2.	Google Drive Sync
+	•	Authenticate with a Google service account.
+	•	Upload generated images from RunPod to a chosen Google Drive folder.
+	3.	Auto Upload
+	•	Monitor your RunPod output folder.
+	•	Every 2 minutes, new images are automatically uploaded to Google Drive.
+	4.	Easy Configuration
+	•	Save your Google Drive folder ID and CivitAI API key once.
+	•	Automatically reloads them from config.json in future runs.
 
-3. **Automated Photo Sync**:
-    - Continuously monitors RunPod's output directory for new images and uploads them to Google Drive every 2 minutes.
+⸻
 
-4. **Configuration Management**:
-    - Saves and loads the Google Drive folder ID and CivitAI API key for seamless setup.
+🛠 Requirements
+	•	Python packages: googleapiclient, google-auth, plus built-ins (os, shutil, json, time)
+	•	RunPod environment with Stable Diffusion (A1111)
+	•	Model directory: /workspace/stable-diffusion-webui/models/Stable-diffusion
+	•	Output directory: /workspace/stable-diffusion-webui/outputs/txt2img-images
+	•	Google Drive service account JSON credentials
+	•	CivitAI API key
 
----
+⸻
 
-## Requirements
+🚀 Setup
+	1.	Upload your Google Drive credentials file (credentials.json) to /workspace/ in RunPod.
+	2.	Make sure your RunPod Stable Diffusion instance is running with the expected directories.
 
-1. **Python Libraries**:
-    - `googleapiclient`
-    - `google-auth`
-    - `os`, `shutil`, `json`, `time`
+⸻
 
-2. **RunPod Environment**:
-    - Stable Diffusion A111 instance hosted on RunPod.
-    - Output directory for images: `/workspace/stable-diffusion-webui/outputs/txt2img-images/<YYYY-MM-DD>`
+▶ Usage
 
-3. **Google Drive Credentials**:
-    - A service account JSON file with the required permissions to access the target Google Drive folder.
+Run the script:
 
-4. **CivitAI API Key**:
-    - A valid API key to authenticate and download models.
-
----
-
-## Setup and Usage
-
-### 1. Prepare Environment
-
-1. Place your Google service account credentials file (`credentials.json`) in the `/workspace/` directory on RunPod.
-2. Ensure the Stable Diffusion instance on RunPod is running and has access to the required directories:
-    - `/workspace/stable-diffusion-webui/models/Stable-diffusion`
-    - `/workspace/stable-diffusion-webui/outputs/txt2img-images`
-
-### 2. Run the Script
-
-```bash
 python script_name.py
-```
 
-### 3. Initial Configuration
-- On the first run, you will be prompted to provide:
-    - **Google Drive Folder ID**: The ID of the Drive folder where images will be uploaded.
-    - **CivitAI API Key**: Your API key to download models.
-- These details are saved in a `config.json` file for future use.
+First run setup
 
----
+You’ll be asked for:
+	•	Google Drive Folder ID (where images should upload)
+	•	CivitAI API Key
 
-## Workflow
+These are saved in config.json for future runs.
 
-### 1. Download and Organize Models (Option 1)
+⸻
 
-- Select the **Download and Move a Model** option.
-- Provide the URL of the model on CivitAI.
-- The script will:
-    - Append your API key to the URL.
-    - Download the model to a temporary location.
-    - Move the model to the `/workspace/stable-diffusion-webui/models/Stable-diffusion/` directory on RunPod.
+🔄 Workflow Options
+	1.	Download & Move Model
+	•	Enter a CivitAI model URL.
+	•	Script appends your API key, downloads it, and places it in the correct RunPod models folder.
+	2.	Auto-Upload Photos
+	•	Script watches the output folder for new images.
+	•	Every 2 minutes, new files are uploaded to your Google Drive folder.
 
-### 2. Upload Generated Photos to Google Drive (Option 2)
+You can choose either or both based on your workflow.
 
-- Select the **Copy Photos to Google Drive** option.
-- The script will monitor the output directory (`/workspace/stable-diffusion-webui/outputs/txt2img-images/<YYYY-MM-DD>`) for new images and upload them to the specified Google Drive folder every 2 minutes.
+⸻
 
-**Note:** You can choose to run either option (1 or 2) based on your needs.
+⚙ Config File Example
 
----
-
-## Configuration File
-
-The script saves configuration details in `config.json`:
-```json
 {
-  "folder_id": "Your Google Drive Folder ID",
-  "api_key": "Your CivitAI API Key"
+  "folder_id": "your-google-drive-folder-id",
+  "api_key": "your-civitai-api-key"
 }
-```
 
----
 
-## Notes
+⸻
 
-- Ensure the necessary directories exist before running the script. If a required folder or file is missing, the script will handle it gracefully and retry after the defined interval (e.g., 2 minutes for photo uploads).
-- Verify that your service account has the correct permissions for read/write access to the Google Drive folder.
+🧩 Troubleshooting
+	•	Credential errors → Check credentials.json is in /workspace/ and valid.
+	•	Drive folder issues → Ensure correct folder ID + service account permissions.
+	•	Model download failures → Verify CivitAI link + API key.
+	•	Directory mismatches → Make sure your RunPod folder paths match the ones in this README.
 
----
+⸻
 
-## Troubleshooting
+⸻
 
-1. **Credential Errors**:
-    - Ensure `credentials.json` is placed in the `/workspace/` directory and contains valid service account credentials.
-
-2. **Folder Access Issues**:
-    - Verify the Google Drive folder ID and ensure the service account has access.
-
-3. **Model Download Failures**:
-    - Ensure the CivitAI URL and API key are correct.
-
-4. **RunPod Directory Issues**:
-    - Verify the directory structure on RunPod matches the expected paths.
-
----
-
-## License
-
-This project is licensed
+👉 Would you like me to also simplify the README further for non-technical users (like a step-by-step “do this, then this” quick start), or keep it developer-style as above?
